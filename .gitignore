@@ -5,3 +5,14 @@ script_errors.log
 /.idea/misc.xml
 /.idea/modules.xml
 /.idea/vcs.xml
+
+# =================================================
+# Temp Toolchain Stuff
+# =================================================
+/tools/.env
+/tools/context_payload.json
+/tools/prompts/debug_last_prompt.md
+/tools/prompts/debug_last_response.md
+/tools/context_manager_config.json
+/tools/more_context.md
+/tools/context_manager_last_run_stats_*.json
