@@ -1,3 +1,7 @@
 ServerMods/
 script_errors.log
 *.class
+/Client Mod Extractor.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/vcs.xml
