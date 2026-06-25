@@ -1,10 +1,22 @@
-import java.io.*;
-import java.net.*;
-import java.nio.file.*;
-import java.util.*;
-import java.util.regex.*;
-import java.util.zip.*;
-import java.util.stream.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class ModExtractor {
     private static final String CF_EXCLUDES_URL = "https://raw.githubusercontent.com/itzg/docker-minecraft-server/master/files/cf-exclude-include.json";
@@ -111,8 +123,7 @@ public class ModExtractor {
                             extractedModId = idMatcher.group(1);
                         }
 
-                        // To avoid false positives on dependencies (like Create's dependency on Flywheel),
-                        // we only scan the TOML up to the first [[dependencies.*]] or [[mixins]] block.
+                        // To avoid false positives on dependencies, only scan TOML up to first [[dependencies.*]] or [[mixins]] block
                         String coreToml = tomlContent.split("\\[\\[(dependencies|mixins)")[0];
 
                         if (Pattern.compile("clientSideOnly\\s*=\\s*true", Pattern.CASE_INSENSITIVE).matcher(coreToml).find() ||
@@ -163,7 +174,7 @@ public class ModExtractor {
     }
 
     private static void extractJsonArray(String json, String arrayName, Set<String> targetSet) {
-        // Simple regex to extract JSON array contents since we don't have a JSON parser library
+        // Regex to extract JSON array contents
         Matcher arrayMatcher = Pattern.compile("\"" + arrayName + "\"\\s*:\\s*\\[(.*?)\\]", Pattern.DOTALL).matcher(json);
         if (arrayMatcher.find()) {
             String arrayContent = arrayMatcher.group(1);
