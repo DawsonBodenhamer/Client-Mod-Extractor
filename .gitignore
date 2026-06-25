@@ -6,6 +6,8 @@ script_errors.log
 /.idea/modules.xml
 /.idea/vcs.xml
 
+/ClientModExtractor.iml
+
 # =================================================
 # Temp Toolchain Stuff
 # =================================================
