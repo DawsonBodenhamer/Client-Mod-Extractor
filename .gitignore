@@ -9,5 +9,4 @@ script_errors.log
 # =================================================
 # =================================================
 /tools/.env
-/tools/context_manager_config.json
 /tools/context_manager_last_run_stats_*.json
