@@ -19,8 +19,8 @@ If you are a Minecraft server owner, you probably know the pain of downloading o
 **Step 1: Download**
 1. Locate the **Releases** section on the right side of this GitHub page.
 2. Click on the latest version number (e.g., `v1.0.1`).
-3. Scroll down to the **Assets** heading.
-4. Click `Client-Mod-Extractor.zip` to download it. (Do not click "Source code").
+3. Scroll down to the **Assets** heading. (**Do not click "Source code" or "Assets"**)
+4. Click `Client-Mod-Extractor.zip` to download it.
 
 **Step 2: Setup**
 1. Extract the downloaded `.zip` file.
