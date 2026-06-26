@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Consolidated extraction logic into `ModExtractor.java` for cross-platform compatibility.
   - Implemented remote fetching for both public and custom exclusion lists.
   - Added lightweight launcher scripts (`Run-Extractor-Windows.bat` and `Run-Extractor-Linux.sh`).
+  - Aligned CLI output columns using fixed-width string formatting for improved readability.
 - **Dynamic Exclusion System**
   - Fetches known problematic server mods from GitHub dynamically.
   - Gracefully falls back to local `custom-excludes.txt` if offline.
