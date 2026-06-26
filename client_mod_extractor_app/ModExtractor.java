@@ -144,15 +144,19 @@ public class ModExtractor {
                     System.out.println("[Warning] Could not read contents of " + jar.getName() + ". Defaulting to keeping it.");
                 }
 
+                // --- Process Output and Log ---
+                String loaderTag = String.format("[%s]", loaderType);
+
                 if (extractedModId != null && normalizedExcludes.contains(extractedModId.toLowerCase())) {
-                    System.out.println("[" + loaderType + "] [PROBLEMATIC MOD] Skipping: " + jar.getName() + " (Mod ID: " + extractedModId + ")");
+                    System.out.printf("%-18s %-18s Skipping: %s (Mod ID: %s)%n", loaderTag, "[PROBLEMATIC MOD]", jar.getName(), extractedModId);
                 } else if (isClientOnly) {
-                    System.out.println("[" + loaderType + "] [CLIENT ONLY]   Skipping: " + jar.getName());
+                    System.out.printf("%-18s %-18s Skipping: %s%n", loaderTag, "[CLIENT ONLY]", jar.getName());
                 } else {
-                    System.out.println("[" + loaderType + "] [SERVER/BOTH]   Copying: " + jar.getName());
+                    System.out.printf("%-18s %-18s Copying:  %s%n", loaderTag, "[SERVER/BOTH]", jar.getName());
                     Files.copy(jar.toPath(), targetFolder.resolve(jar.getName()), StandardCopyOption.REPLACE_EXISTING);
                     copiedCount++;
                 }
+
                 processedCount++;
             }
 
