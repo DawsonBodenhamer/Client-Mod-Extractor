@@ -73,7 +73,7 @@ public class ModExtractor {
 
             // Normalize excludes to lower case for case-insensitive matching
             Set<String> normalizedExcludes = excludeSet.stream().map(String::toLowerCase).collect(Collectors.toSet());
-            System.out.println("Total known problematic mods loaded: " + normalizedExcludes.size());
+            System.out.println("Loaded " + normalizedExcludes.size() + " exclusion rules from remote lists.");
             System.out.println();
 
             File[] jarFiles = sourceFolder.toFile().listFiles((d, name) -> name.toLowerCase().endsWith(".jar"));
@@ -83,7 +83,7 @@ public class ModExtractor {
             int copiedCount = 0;
 
             System.out.println("Location: " + sourceFolder);
-            System.out.println("Scrubbing through " + jarFiles.length + " mods...");
+            System.out.println("Scrubbing through " + jarFiles.length + " jar files...");
             System.out.println();
 
             for (File jar : jarFiles) {
@@ -92,7 +92,7 @@ public class ModExtractor {
                 String extractedModId = null;
 
                 try (ZipFile zip = new ZipFile(jar)) {
-                    // 1. CHECK FABRIC
+                    // --- 1. Check Fabric ---
                     ZipEntry fabricEntry = zip.getEntry("fabric.mod.json");
                     if (fabricEntry != null) {
                         loaderType = "Fabric";
@@ -104,28 +104,33 @@ public class ModExtractor {
                             isClientOnly = true;
                         }
 
-                        // Extract mod id to check against exclude lists
+                        // Extract mod ID to check against exclude lists
                         Matcher idMatcher = Pattern.compile("\"id\"\\s*:\\s*[\"']([^\"']+)[\"']").matcher(jsonContent);
                         if (idMatcher.find()) {
                             extractedModId = idMatcher.group(1);
                         }
                     }
 
-                    // 2. CHECK NEOFORGE / FORGE
+                    // --- 2. Check NeoForge and Forge ---
                     ZipEntry tomlEntry = zip.getEntry("META-INF/neoforge.mods.toml");
                     if (tomlEntry == null) tomlEntry = zip.getEntry("META-INF/mods.toml");
                     
                     if (tomlEntry != null) {
-                        loaderType = tomlEntry.getName().contains("neoforge") ? "NeoForge" : "Forge";
+                        if ("Fabric".equals(loaderType)) {
+                            loaderType = tomlEntry.getName().contains("neoforge") ? "Fabric/NeoForge" : "Fabric/Forge";
+                        } else {
+                            loaderType = tomlEntry.getName().contains("neoforge") ? "NeoForge" : "Forge";
+                        }
+                        
                         String tomlContent = readZipEntry(zip, tomlEntry);
 
-                        // Extract modId
+                        // Extract mod ID if not already found
                         Matcher idMatcher = Pattern.compile("modId\\s*=\\s*[\"']([^\"']+)[\"']").matcher(tomlContent);
-                        if (idMatcher.find()) {
+                        if (extractedModId == null && idMatcher.find()) {
                             extractedModId = idMatcher.group(1);
                         }
 
-                        // To avoid false positives on dependencies, only scan TOML up to first [[dependencies.*]] or [[mixins]] block
+                        // Scan TOML up to first dependency block to avoid false positives
                         String coreToml = tomlContent.split("\\[\\[(dependencies|mixins)")[0];
 
                         if (Pattern.compile("clientSideOnly\\s*=\\s*true", Pattern.CASE_INSENSITIVE).matcher(coreToml).find() ||
