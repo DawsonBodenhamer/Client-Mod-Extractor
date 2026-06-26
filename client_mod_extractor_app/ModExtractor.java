@@ -1,3 +1,5 @@
+package client_mod_extractor_app;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;

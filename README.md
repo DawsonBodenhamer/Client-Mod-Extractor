@@ -16,14 +16,25 @@ If you are a Minecraft server owner, you probably know the pain of downloading o
 
 ## How to Use
 
-1. Download the `ModExtractor.java` file + your specific launcher script:
-   - For Windows → `Run-Extractor-Windows.bat`
-   - For Linux → `Run-Extractor-Linux.sh`
-2. Drop both files into your `mods` folder where all your `.jar` files are located.
-3. Double-click the launcher script.
-4. Wait for the script to finish running.
-5. Open the newly created `ServerMods` folder and grab your safe, server-ready mods!
-6. Delete or move the `ServerMods` folder out of your `mods` folder.
+**Step 1: Download**
+1. Locate the **Releases** section on the right side of this GitHub page.
+2. Click on the latest version number (e.g., `v1.0.1`).
+3. Scroll down to the **Assets** heading.
+4. Click `Client-Mod-Extractor.zip` to download it. (Do not click "Source code").
+
+**Step 2: Setup**
+1. Extract the downloaded `.zip` file.
+2. Open your Minecraft `mods` folder where your `.jar` files are currently located.
+3. Move the extracted files (`ModExtractor.java`, `Run-Extractor-Windows.bat`, and `Run-Extractor-Linux.sh`) directly into that `mods` folder.
+
+**Step 3: Run**
+1. Double-click the launcher script for your operating system:
+   - **Windows:** `Run-Extractor-Windows.bat`
+   - **Linux / Mac:** `Run-Extractor-Linux.sh`
+2. Wait for the terminal window to process the files.
+3. Open the newly created `ServerMods` folder.
+4. The `.jar` files inside `ServerMods` are safe for servers. Move these files to your live server's mods directory.
+5. You can leave `ModExtractor.java` and the `.bat`/`.sh` files in your `mods` folder— Minecraft won't touch them— but you should probably delete the `ServerMods` folder once you're done, since it's full of `.jar` files.
 
 ---
 
