@@ -11,13 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Better Reliability**
   - Added pre-flight system checks to `.bat` and `.sh` launchers to verify correct Java JDK installation before execution.
   - Added clear error messaging with direct download links/commands for missing JDK installations.
-
-### Changed
 - **Blacklisted Mods**
-  - Added
+  - Added `equipmentcompare` to `custom-excludes.txt`
 
 ### Fixed
-
+- **Client Mod Detection**
+  - Fixed an issue where remote blacklists failed to match mods due to hyphens vs. underscores in Mod IDs.
+  - Updated NeoForge metadata parsing to identify mods that declare client-side restrictions within base-game dependencies.
 - **Package Declarations**
   - Updated `publish_release.py` to dynamically strip package path declarations during the build process to maintain JEP 330 execution compatibility.
 - **Output Directory**
