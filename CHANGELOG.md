@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Better Reliability**
   - Added pre-flight system checks to `.bat` and `.sh` launchers to verify correct Java JDK installation before execution.
   - Added clear error messaging with direct download links/commands for missing JDK installations.
+  - Added 24-bit RGB ANSI color coding to standard terminal output for improved readability.
+  - Integrated dynamic console coloration targeting path directories and search logs.
+  - Appended an active community reporting directive guiding users to submit unmapped server crashes directly to GitHub.
 - **Blacklisted Mods**
   - Added `equipmentcompare` to `custom-excludes.txt`
 

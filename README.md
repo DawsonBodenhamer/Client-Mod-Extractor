@@ -32,6 +32,7 @@ If you are a Minecraft server owner, you probably know the pain of downloading o
 1. Double-click the launcher script for your operating system:
    - **Windows:** `Run-Extractor-Windows.bat`
    - **Linux / Mac:** `Run-Extractor-Linux.sh`
+   - *Note for Windows users: If Windows displays a "Security Warning" or "Windows protected your PC" prompt, uncheck "Always ask before opening this file" and click **Run**, or click **More info** followed by **Run anyway**.*
 2. Wait for the terminal window to process the files.
 3. Open the newly created `Save_For_Server_Mods` folder.
 4. The `.jar` files inside `Save_For_Server_Mods` are... wait for it... safe for servers. Move these files to your server's `mods` folder.
