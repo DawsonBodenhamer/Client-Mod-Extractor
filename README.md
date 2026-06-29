@@ -1,8 +1,7 @@
 # Client Mod Extractor
 
-
 ## TL;DR
-This tool scans through a folder full of `.jar` files, identifies which ones are safe for the server, and safely copies them into a `ServerMods` folder so you can drag-and-drop them right onto your server.
+This tool scans through a folder full of `.jar` files, identifies which ones are safe for the server, and safely copies them into a `Save_For_Server_Mods` folder so you can drag-and-drop them right onto your server.
 
 ## The Problem I'm Fixing
 If you are a Minecraft server owner, you probably know the pain of downloading or creating a big modpack to put on your server, only to realize that half of the mods in the folder are "Client-Side Only" (mods that only change things on your screen, like menus or sounds). If you drop those client-side mods onto your server, your server will either **instantly crash**, or **crash later** when the client-only code tries to run on the server.
@@ -25,16 +24,18 @@ If you are a Minecraft server owner, you probably know the pain of downloading o
 **Step 2: Setup**
 1. Extract the downloaded `.zip` file.
 2. Open your Minecraft `mods` folder where your `.jar` files are currently located.
-3. Move the extracted files (`ModExtractor.java`, `Run-Extractor-Windows.bat`, and `Run-Extractor-Linux.sh`) directly into that `mods` folder.
+3. Move the extracted files (`ClientModExtractor.java`, `Run-Extractor-Windows.bat`, and `Run-Extractor-Linux.sh`) directly into that `mods` folder.
+
+*Note: Ignore the `ADVANCED_REVERSE_TOOL` folder unless you specifically know what it is for.*
 
 **Step 3: Run**
 1. Double-click the launcher script for your operating system:
    - **Windows:** `Run-Extractor-Windows.bat`
    - **Linux / Mac:** `Run-Extractor-Linux.sh`
 2. Wait for the terminal window to process the files.
-3. Open the newly created `ServerMods` folder.
-4. The `.jar` files inside `ServerMods` are safe for servers. Move these files to your live server's mods directory.
-5. You can leave `ModExtractor.java` and the `.bat`/`.sh` files in your `mods` folder— Minecraft won't touch them— but you should probably delete the `ServerMods` folder once you're done, since it's full of `.jar` files.
+3. Open the newly created `Save_For_Server_Mods` folder.
+4. The `.jar` files inside `Save_For_Server_Mods` are... wait for it... safe for servers. Move these files to your server's `mods` folder.
+5. You can leave `ClientModExtractor.java` and the `.bat`/`.sh` files in your `mods` folder— Minecraft won't touch them— but you should probably delete the `Save_For_Server_Mods` folder once you're done, since it's full of `.jar` files.
 
 ---
 
