@@ -30,6 +30,8 @@ public class ClientModExtractor {
      *        Constants and Configuration
      * ────────────────────────────────────────────────────────────────────────────*/
 
+    private static final String CURRENT_VERSION = "1.0.3";
+
     private static final String CF_EXCLUDES_URL = "https://raw.githubusercontent.com/itzg/docker-minecraft-server/master/files/cf-exclude-include.json";
     private static final String MODRINTH_EXCLUDES_URL = "https://raw.githubusercontent.com/itzg/docker-minecraft-server/master/files/modrinth-exclude-include.json";
     private static final String CUSTOM_EXCLUDES_URL = "https://raw.githubusercontent.com/DawsonBodenhamer/Client-Mod-Extractor/main/custom-excludes.txt";
@@ -51,11 +53,37 @@ public class ClientModExtractor {
      */
     public static void main(String[] args) {
 
-        // --- 1. Parse Arguments ---
+        // --- 1. Parse Arguments. ---
         boolean promptAffirmation = Arrays.asList(args).contains("--prompt-affirmation");
         System.out.println(ANSI_CYAN + "Starting Client Mod Extractor..." + ANSI_RESET);
 
-        // --- 2. Build Target Directory ---
+        // --- 2. Check for Updates. ---
+        String latestVersion = getLatestVersion();
+        if (isNewerVersion(CURRENT_VERSION, latestVersion)) {
+            System.out.println(ANSI_YELLOW + "==========================================================");
+            System.out.println("  UPDATE AVAILABLE: Version v" + latestVersion + " is now ready! (Current: v" + CURRENT_VERSION + ")");
+            System.out.println("==========================================================" + ANSI_RESET);
+            System.out.println("Updating ensures you have the latest community exclusions and bug fixes.");
+            System.out.println();
+            System.out.println(ANSI_GREEN + "Quick Update Guide:" + ANSI_RESET);
+            System.out.println("  1. Go to: " + ANSI_CYAN +
+                    "https://github.com/DawsonBodenhamer/Client-Mod-Extractor/releases/latest" + ANSI_RESET);
+            System.out.println("  2. Scroll down to the " + ANSI_YELLOW + "Assets" + ANSI_RESET + " section at the bottom.");
+            System.out.println("  3. Click and download " + ANSI_GREEN + "Client-Mod-Extractor.zip" + ANSI_RESET + ".");
+            System.out.println("  4. Extract that ZIP file on your computer.");
+            System.out.println("  5. Move the extracted files directly into your Minecraft " + ANSI_YELLOW + "mods" + ANSI_RESET + " folder,");
+            System.out.println("     replacing the old " + ANSI_CYAN + "ClientModExtractor.java" + ANSI_RESET + " file when prompted.");
+            System.out.println();
+            System.out.println("Press [Enter] to continue running your current version...");
+            try {
+                new BufferedReader(new InputStreamReader(System.in)).readLine();
+            } catch (Exception e) {
+                // Ignore exception and continue running
+            }
+            System.out.println();
+        }
+
+        // --- 3. Build Target Directory ---
         Path sourceFolder = Paths.get("").toAbsolutePath();
         Path targetFolder = sourceFolder.resolve("Save_For_Server_Mods");
 
@@ -64,7 +92,7 @@ public class ClientModExtractor {
                 Files.createDirectories(targetFolder);
             }
 
-            // --- 3. Fetch Remote Exclusions ---
+            // --- 4. Fetch Remote Exclusions ---
             Set<String> excludeSet = new HashSet<>();
 
             // Fetch CurseForge exclusions
@@ -106,7 +134,7 @@ public class ClientModExtractor {
                     .map(ClientModExtractor::normalizeModId)
                     .collect(Collectors.toSet());
 
-            // --- 4. Process Local Archives ---
+            // --- 5. Process Local Archives ---
             File[] jarFiles = sourceFolder.toFile().listFiles((d, name) -> name.toLowerCase().endsWith(".jar"));
             if (jarFiles == null) {
                 jarFiles = new File[0];
@@ -217,20 +245,22 @@ public class ClientModExtractor {
             System.out.println();
             System.out.println(ANSI_CYAN + "==========================================================");
             System.out.println("Done! Processed " + processedCount + " mods.");
-            System.out.println("Copied " + copiedCount + " server-safe mods to: ./Save_For_Server_Mods");
-            System.out.println("==========================================================" + ANSI_RESET);
+            System.out.println("Copied " + copiedCount + " server-safe mods to: ./Save_For_Server_Mods" + ANSI_RESET);
             System.out.println();
-            System.out.println(ANSI_YELLOW + "Database Check:" + ANSI_RESET);
-            System.out.println("Successfully queried remote database and verified " + ANSI_GREEN + normalizedExcludes.size() + ANSI_RESET + " community-blacklisted mods.");
+            System.out.println(ANSI_YELLOW + "==========================================================");
+            System.out.println("Database Check:" + ANSI_RESET);
+            System.out.println("Successfully checked online database and found " + ANSI_GREEN + normalizedExcludes.size() + ANSI_RESET + " community-blacklisted mods.");
             System.out.println("This list was used to manually block client-only mods that were " + ANSI_RED + "mislabeled by their developers" + ANSI_RESET + ".");
 
-            // --- 5. Support and Issue Reporting. ---
+            // --- 6. Support and Issue Reporting. ---
             if (promptAffirmation) {
                 System.out.println();
-                System.out.println(ANSI_YELLOW + "Server Still Crashing?" + ANSI_RESET);
-                System.out.println("As you've probably seen, some client-only mods mislabel their metadata, which causes them to slip past automatic detection.");
-                System.out.println("Please submit a GitHub issue report to help update the community blacklist.");
-                System.out.println("As more users report these mods, the database becomes bigger, preventing future crashes for others (and yourself if you need to run this script again later).");
+                System.out.println(ANSI_YELLOW + "==========================================================");
+                System.out.println("Server Still Crashing?" + ANSI_RESET);
+                System.out.println("Some client-only mods mislabel their metadata, thus slipping past automatic detection.");
+                System.out.println("Please submit a GitHub issue report to help me update my blacklist.");
+                System.out.println("As more users report these mods, the blacklist becomes bigger, preventing future crashes for others (and yourself when you need to run this script again later).");
+                System.out.println();
                 System.out.println("To submit a report:");
                 System.out.println("  1. Navigate to: " + ANSI_CYAN +
                         "https://github.com/DawsonBodenhamer/Client-Mod-Extractor/issues" + ANSI_RESET);
@@ -239,9 +269,10 @@ public class ClientModExtractor {
                         ANSI_RED + "JAR filename" + ANSI_RESET + " that caused the crash.");
             }
 
-            // --- 6. Affirmation Message. ---
+            // --- 7. Affirmation Message. ---
             if (promptAffirmation) {
                 System.out.println();
+                System.out.println("==========================================================");
                 System.out.println("Hold CTRL and click " +
                         "\u001B]8;;https://www.bible.com/bible/8/JHN.3.16.AMPC\u001B\\here\u001B]8;;\u001B\\" +
                         " if you need a real friend.");
@@ -259,6 +290,60 @@ public class ClientModExtractor {
      * ────────────────────────────────────────────────────────────────────────────*/
 
     /**
+     * Checks the GitHub repository releases API to retrieve the latest version tag.
+     *
+     * @return Latest tag string, or null if query fails
+     */
+    private static String getLatestVersion() {
+        try {
+            String json = fetchUrl("https://api.github.com/repos/DawsonBodenhamer/Client-Mod-Extractor/releases/latest");
+            Matcher matcher = Pattern.compile("\"tag_name\"\\s*:\\s*\"v?([^\"]+)\"").matcher(json);
+            if (matcher.find()) {
+                return matcher.group(1);
+            }
+        } catch (Exception e) {
+            // Silently absorb version check exceptions to maintain offline capability
+        }
+        return null;
+    }
+
+    /**
+     * Compares two semantic version strings to determine if an update is available.
+     *
+     * @param current The active local version
+     * @param latest The retrieved repository version
+     * @return True if latest version is numerically greater than current version
+     */
+    private static boolean isNewerVersion(String current, String latest) {
+        if (latest == null || current == null) {
+            return false;
+        }
+        try {
+            String[] cur = current.split("[.-]");
+            String[] lat = latest.split("[.-]");
+            int len = Math.max(cur.length, lat.length);
+            for (int i = 0; i < len; i++) {
+                int cVal = 0;
+                int lVal = 0;
+                if (i < cur.length) {
+                    String s = cur[i].replaceAll("[^0-9]", "");
+                    if (!s.isEmpty()) cVal = Integer.parseInt(s);
+                }
+                if (i < lat.length) {
+                    String s = lat[i].replaceAll("[^0-9]", "");
+                    if (!s.isEmpty()) lVal = Integer.parseInt(s);
+                }
+                if (lVal > cVal) return true;
+                if (cVal > lVal) return false;
+            }
+        } catch (Exception e) {
+            // Fallback to string inequality comparison if structure is non-standard
+            return !current.equals(latest);
+        }
+        return false;
+    }
+
+    /**
      * Fetches text payload from target URL.
      *
      * @param urlString Target URL
@@ -269,6 +354,7 @@ public class ClientModExtractor {
         URL url = URI.create(urlString).toURL();
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
+        conn.setRequestProperty("User-Agent", "Client-Mod-Extractor");
         conn.setConnectTimeout(5000);
         conn.setReadTimeout(5000);
 

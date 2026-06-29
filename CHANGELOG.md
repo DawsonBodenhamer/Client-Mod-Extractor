@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Better Reliability**
   - Added pre-flight system checks to `.bat` and `.sh` launchers to verify correct Java JDK installation before execution.
+  - Added pre-flight update checker with beginner-friendly installation reminder when updates are available on GitHub.
   - Added clear error messaging with direct download links/commands for missing JDK installations.
   - Added 24-bit RGB ANSI color coding to standard terminal output for improved readability.
   - Integrated dynamic console coloration targeting path directories and search logs.
