@@ -16,7 +16,6 @@ if %errorlevel% neq 0 (
     exit /b
 )
 echo.
-echo Starting Client Mod Extractor...
 java ClientModExtractor.java --prompt-affirmation
 echo.
 pause

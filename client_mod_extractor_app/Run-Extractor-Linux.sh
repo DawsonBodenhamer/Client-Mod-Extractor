@@ -20,7 +20,6 @@ fi
 
 java -version
 echo
-echo "[Linux Launcher] Starting Client Mod Extractor..."
 
 java ClientModExtractor.java --prompt-affirmation
 

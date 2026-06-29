@@ -13,7 +13,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,6 +34,12 @@ public class ClientModExtractor {
     private static final String MODRINTH_EXCLUDES_URL = "https://raw.githubusercontent.com/itzg/docker-minecraft-server/master/files/modrinth-exclude-include.json";
     private static final String CUSTOM_EXCLUDES_URL = "https://raw.githubusercontent.com/DawsonBodenhamer/Client-Mod-Extractor/main/custom-excludes.txt";
 
+    private static final String ANSI_RESET = "\u001B[0m";
+    private static final String ANSI_RED = "\u001B[38;2;255;74;74m";
+    private static final String ANSI_GREEN = "\u001B[38;2;0;230;118m";
+    private static final String ANSI_YELLOW = "\u001B[38;2;255;215;0m";
+    private static final String ANSI_CYAN = "\u001B[38;2;0;191;255m";
+
     /* ──────────────────────────────────────────────────────────────────────────────
      *        Public Execution
      * ────────────────────────────────────────────────────────────────────────────*/
@@ -47,36 +52,8 @@ public class ClientModExtractor {
     public static void main(String[] args) {
 
         // --- 1. Parse Arguments ---
-        // Check for interactive prompt argument
         boolean promptAffirmation = Arrays.asList(args).contains("--prompt-affirmation");
-        if (promptAffirmation) {
-            Scanner scanner = new Scanner(System.in);
-            System.out.println();
-
-            while (true) {
-                System.out.println("Are you a unique and valuable human? [Type Y or N and press Enter]");
-                System.out.print("> ");
-                String answer = scanner.nextLine().trim().toLowerCase();
-
-                if (answer.equals("y") || answer.equals("yes")) {
-                    System.out.println();
-                    System.out.println("That's a great start. Hold CTRL and click https://www.bible.com/bible/8/JHN.3.16.AMPC if you need a friend.");
-                    System.out.println();
-
-                    // Pause 2 seconds to allow user to read message
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                    break;
-                } else {
-                    System.out.println();
-                    System.out.println("Wrong answer. Every human is unique and valuable in their own way. Try again.");
-                    System.out.println();
-                }
-            }
-        }
+        System.out.println(ANSI_CYAN + "Starting Client Mod Extractor..." + ANSI_RESET);
 
         // --- 2. Build Target Directory ---
         Path sourceFolder = Paths.get("").toAbsolutePath();
@@ -89,14 +66,13 @@ public class ClientModExtractor {
 
             // --- 3. Fetch Remote Exclusions ---
             Set<String> excludeSet = new HashSet<>();
-            System.out.println("Fetching remote exclusion lists...");
 
             // Fetch CurseForge exclusions
             try {
                 String cfJson = fetchUrl(CF_EXCLUDES_URL);
                 extractJsonArray(cfJson, "globalExcludes", excludeSet);
             } catch (Exception e) {
-                System.out.println("[Warning] Failed to fetch CurseForge excludes. Offline mode? " + e.getMessage());
+                // Silently absorb or load local fallback later
             }
 
             // Fetch Modrinth exclusions
@@ -104,10 +80,10 @@ public class ClientModExtractor {
                 String modrinthJson = fetchUrl(MODRINTH_EXCLUDES_URL);
                 extractJsonArray(modrinthJson, "globalExcludes", excludeSet);
             } catch (Exception e) {
-                System.out.println("[Warning] Failed to fetch Modrinth excludes. " + e.getMessage());
+                // Silently absorb or load local fallback later
             }
 
-            // Fetch my exclusions
+            // Fetch custom exclusions
             try {
                 String customList = fetchUrl(CUSTOM_EXCLUDES_URL);
                 Arrays.stream(customList.split("\n"))
@@ -115,7 +91,6 @@ public class ClientModExtractor {
                         .filter(s -> !s.isEmpty())
                         .forEach(excludeSet::add);
             } catch (Exception e) {
-                System.out.println("[Warning] Failed to fetch custom excludes. Falling back to local file. " + e.getMessage());
                 Path localCustom = sourceFolder.resolve("custom-excludes.txt");
                 if (Files.exists(localCustom)) {
                     Files.readAllLines(localCustom).stream()
@@ -131,8 +106,6 @@ public class ClientModExtractor {
                     .map(ClientModExtractor::normalizeModId)
                     .collect(Collectors.toSet());
 
-            System.out.println("Loaded " + normalizedExcludes.size() + " exclusion rules from remote lists.\n");
-
             // --- 4. Process Local Archives ---
             File[] jarFiles = sourceFolder.toFile().listFiles((d, name) -> name.toLowerCase().endsWith(".jar"));
             if (jarFiles == null) {
@@ -142,8 +115,8 @@ public class ClientModExtractor {
             int processedCount = 0;
             int copiedCount = 0;
 
-            System.out.println("Location: " + sourceFolder);
-            System.out.println("Scrubbing through " + jarFiles.length + " jar files...\n");
+            System.out.println(ANSI_CYAN + "Location: " + sourceFolder);
+            System.out.println("Scanning " + jarFiles.length + " files...\n" + ANSI_RESET);
 
             for (File jar : jarFiles) {
                 boolean isClientOnly = false;
@@ -219,18 +192,21 @@ public class ClientModExtractor {
                     }
 
                 } catch (Exception e) {
-                    System.out.println("[Warning] Could not read contents of " + jar.getName() + ". Defaulting to keeping it.");
+                    System.out.println(ANSI_YELLOW + "[Warning] Could not read contents of " + jar.getName() + ". Defaulting to keeping it." + ANSI_RESET);
                 }
 
-                // --- Process Output and Log ---
+                // --- Process Output ---
                 String loaderTag = String.format("[%s]", loaderType);
 
                 if (extractedModId != null && normalizedExcludes.contains(normalizeModId(extractedModId))) {
-                    System.out.printf("%-18s %-18s Skipping: %s (Mod ID: %s)%n", loaderTag, "[PROBLEMATIC MOD]", jar.getName(), extractedModId);
+                    System.out.printf(ANSI_RED + "%-20s %-20s Skipping: %s (mislabeled)%n" + ANSI_RESET,
+                            loaderTag, "[SERVER CRASH RISK]", jar.getName());
                 } else if (isClientOnly) {
-                    System.out.printf("%-18s %-18s Skipping: %s%n", loaderTag, "[CLIENT ONLY]", jar.getName());
+                    System.out.printf(ANSI_YELLOW + "%-20s %-20s Skipping: %s%n" + ANSI_RESET,
+                            loaderTag, "[CLIENT ONLY]", jar.getName());
                 } else {
-                    System.out.printf("%-18s %-18s Copying:  %s%n", loaderTag, "[SERVER/BOTH]", jar.getName());
+                    System.out.printf(ANSI_GREEN + "%-20s %-20s Copying:  %s%n" + ANSI_RESET,
+                            loaderTag, "[SERVER/BOTH]", jar.getName());
                     Files.copy(jar.toPath(), targetFolder.resolve(jar.getName()), StandardCopyOption.REPLACE_EXISTING);
                     copiedCount++;
                 }
@@ -238,10 +214,39 @@ public class ClientModExtractor {
                 processedCount++;
             }
 
-            System.out.println("\n==========================================================");
+            System.out.println();
+            System.out.println(ANSI_CYAN + "==========================================================");
             System.out.println("Done! Processed " + processedCount + " mods.");
             System.out.println("Copied " + copiedCount + " server-safe mods to: ./Save_For_Server_Mods");
-            System.out.println("==========================================================");
+            System.out.println("==========================================================" + ANSI_RESET);
+            System.out.println();
+            System.out.println(ANSI_YELLOW + "Database Check:" + ANSI_RESET);
+            System.out.println("Successfully queried remote database and verified " + ANSI_GREEN + normalizedExcludes.size() + ANSI_RESET + " community-blacklisted mods.");
+            System.out.println("This list was used to manually block client-only mods that were " + ANSI_RED + "mislabeled by their developers" + ANSI_RESET + ".");
+
+            // --- 5. Support and Issue Reporting. ---
+            if (promptAffirmation) {
+                System.out.println();
+                System.out.println(ANSI_YELLOW + "Server Still Crashing?" + ANSI_RESET);
+                System.out.println("As you've probably seen, some client-only mods mislabel their metadata, which causes them to slip past automatic detection.");
+                System.out.println("Please submit a GitHub issue report to help update the community blacklist.");
+                System.out.println("As more users report these mods, the database becomes bigger, preventing future crashes for others (and yourself if you need to run this script again later).");
+                System.out.println("To submit a report:");
+                System.out.println("  1. Navigate to: " + ANSI_CYAN +
+                        "https://github.com/DawsonBodenhamer/Client-Mod-Extractor/issues" + ANSI_RESET);
+                System.out.println("  2. Create a 'New Issue'.");
+                System.out.println("  3. Provide the " + ANSI_RED + "Mod ID" + ANSI_RESET + " or " +
+                        ANSI_RED + "JAR filename" + ANSI_RESET + " that caused the crash.");
+            }
+
+            // --- 6. Affirmation Message. ---
+            if (promptAffirmation) {
+                System.out.println();
+                System.out.println("Hold CTRL and click " +
+                        "\u001B]8;;https://www.bible.com/bible/8/JHN.3.16.AMPC\u001B\\here\u001B]8;;\u001B\\" +
+                        " if you need a real friend.");
+                System.out.println();
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
