@@ -114,7 +114,7 @@ public class ClientModExtractor {
             // Fetch custom exclusions
             try {
                 String customList = fetchUrl(CUSTOM_EXCLUDES_URL);
-                Arrays.stream(customList.split("\n"))
+                Arrays.stream(customList.split("[,\\r\\n]+"))
                         .map(String::trim)
                         .filter(s -> !s.isEmpty())
                         .forEach(excludeSet::add);
@@ -122,6 +122,7 @@ public class ClientModExtractor {
                 Path localCustom = sourceFolder.resolve("custom-excludes.txt");
                 if (Files.exists(localCustom)) {
                     Files.readAllLines(localCustom).stream()
+                            .flatMap(line -> Arrays.stream(line.split("[,\\r\\n]+")))
                             .map(String::trim)
                             .filter(s -> !s.isEmpty())
                             .forEach(excludeSet::add);
