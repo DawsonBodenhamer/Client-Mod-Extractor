@@ -30,7 +30,7 @@ public class ClientModExtractor {
      *        Constants and Configuration
      * ────────────────────────────────────────────────────────────────────────────*/
 
-    private static final String CURRENT_VERSION = "1.0.4";
+    private static final String CURRENT_VERSION = "1.0.5";
 
     private static final String CF_EXCLUDES_URL = "https://raw.githubusercontent.com/itzg/docker-minecraft-server/master/files/cf-exclude-include.json";
     private static final String MODRINTH_EXCLUDES_URL = "https://raw.githubusercontent.com/itzg/docker-minecraft-server/master/files/modrinth-exclude-include.json";
