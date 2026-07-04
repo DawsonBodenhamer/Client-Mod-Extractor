@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-07-04
+
+### Added
+- **Blacklisted Mods**
+  - Added `cwb` (Cubes Without Borders updated Mod ID).
+  - Added `enhanced-attack-indicator`.
+  - Added `sodiumextras` and `sodium-extras` to account for NeoForge port naming variants.
+  - Added `equipment-compare` naming variant.
+
+### Fixed
+- **Custom Exclusions Parsing**
+  - Fixed an issue where the `custom-excludes.txt` list was being parsed strictly by newlines instead of commas, which prevented uniquely listed mods (like `mod-loading-screen`, `satisfying_buttons`, `equipmentcompare`, and `crash_assistant`) from being correctly flagged.
+
+---
+
 ## [1.0.3] - 2026-06-29
 
 ### Added
