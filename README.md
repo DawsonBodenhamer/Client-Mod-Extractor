@@ -57,7 +57,9 @@ The script reads the `.jar` files as standard ZIP archives and analyzes their me
 3. Checks the core mod properties for any of the following tags:
    - `clientSideOnly = true`
    - `side = "CLIENT"`
-   - `displayTest = "IGNORE_SERVER_VERSION"`
+   - `displayTest = "IGNORE_ALL_VERSION"`
+
+`displayTest = "IGNORE_SERVER_VERSION"` is not treated as client-only because Forge uses it for server-only compatibility and does not define physical loading behavior with that property.
 
 ### Dynamic Cloud Exclusions
-The script reaches out via standard HTTP GET requests to fetch community-maintained blocklists (such as the `itzg` docker-minecraft-server JSON lists) and my own custom exclusion list. It extracts the JSON arrays using regex and builds a unified Hash Set of blocked mod IDs. Any mod that matches these IDs is skipped, even if its internal metadata claims it is server-safe.
+The script reaches out via standard HTTP GET requests to fetch community-maintained blocklists (such as the `itzg` docker-minecraft-server JSON lists) and my own custom exclusion list. It extracts the JSON arrays using regex and builds a unified Hash Set of blocked mod IDs. Any mod that matches these IDs is skipped, even if its internal metadata claims it is server-safe. This list handles client-only projects whose packaged metadata incorrectly declares them as compatible with both sides.

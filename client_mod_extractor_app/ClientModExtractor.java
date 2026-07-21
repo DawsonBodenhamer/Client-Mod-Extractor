@@ -199,7 +199,6 @@ public class ClientModExtractor {
 
                         if (Pattern.compile("clientSideOnly\\s*=\\s*true", Pattern.CASE_INSENSITIVE).matcher(coreToml).find() ||
                                 Pattern.compile("side\\s*=\\s*[\"']CLIENT[\"']", Pattern.CASE_INSENSITIVE).matcher(coreToml).find() ||
-                                Pattern.compile("displayTest\\s*=\\s*[\"']IGNORE_SERVER_VERSION[\"']", Pattern.CASE_INSENSITIVE).matcher(coreToml).find() ||
                                 Pattern.compile("displayTest\\s*=\\s*[\"']IGNORE_ALL_VERSION[\"']", Pattern.CASE_INSENSITIVE).matcher(coreToml).find()) {
                             isClientOnly = true;
                         }
