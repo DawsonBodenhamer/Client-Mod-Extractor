@@ -1,6 +1,8 @@
 ServerMods/
 script_errors.log
 *.class
+__pycache__/
+*.py[cod]
 /Client Mod Extractor.iml
 /.idea/misc.xml
 /.idea/modules.xml
