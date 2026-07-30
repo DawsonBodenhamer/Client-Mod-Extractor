@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2026-07-30
+
+### Added
+- **Blacklisted Mods**
+  - Added `moremousetweaks` and `ssrcamerafixes` because their packaged metadata does not identify the mods themselves as client-only.
+
+### Fixed
+- **Loader-Specific Client Mod Detection**
+  - Added a NeoForge-only exclusion for `advancementplaques`, preventing its missing Iceberg dependency from crashing extracted servers.
+  - Preserved Advancement Plaques on Forge, where the mod may be required on both the client and server.
+
+---
+
 ## [1.0.5] - 2026-07-20
 
 ### Added

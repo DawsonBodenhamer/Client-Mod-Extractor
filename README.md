@@ -63,3 +63,5 @@ The script reads the `.jar` files as standard ZIP archives and analyzes their me
 
 ### Dynamic Cloud Exclusions
 The script reaches out via standard HTTP GET requests to fetch community-maintained blocklists (such as the `itzg` docker-minecraft-server JSON lists) and my own custom exclusion list. It extracts the JSON arrays using regex and builds a unified Hash Set of blocked mod IDs. Any mod that matches these IDs is skipped, even if its internal metadata claims it is server-safe. This list handles client-only projects whose packaged metadata incorrectly declares them as compatible with both sides.
+
+Rare cases that are client-only on one loader but required on a server for another loader are handled by loader-specific exclusions. For example, Advancement Plaques is excluded on NeoForge without globally excluding its Forge distribution.

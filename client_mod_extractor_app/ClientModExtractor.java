@@ -35,6 +35,7 @@ public class ClientModExtractor {
     private static final String CF_EXCLUDES_URL = "https://raw.githubusercontent.com/itzg/docker-minecraft-server/master/files/cf-exclude-include.json";
     private static final String MODRINTH_EXCLUDES_URL = "https://raw.githubusercontent.com/itzg/docker-minecraft-server/master/files/modrinth-exclude-include.json";
     private static final String CUSTOM_EXCLUDES_URL = "https://raw.githubusercontent.com/DawsonBodenhamer/Client-Mod-Extractor/main/custom-excludes.txt";
+    private static final Set<String> NEOFORGE_EXCLUDES = Set.of("advancementplaques");
 
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_RED = "\u001B[38;2;255;74;74m";
@@ -229,6 +230,9 @@ public class ClientModExtractor {
                 if (extractedModId != null && normalizedExcludes.contains(normalizeModId(extractedModId))) {
                     System.out.printf(ANSI_RED + "%-20s %-20s Skipping: %s (mislabeled)%n" + ANSI_RESET,
                             loaderTag, "[SERVER CRASH RISK]", jar.getName());
+                } else if (isLoaderSpecificExclude(loaderType, extractedModId)) {
+                    System.out.printf(ANSI_RED + "%-20s %-20s Skipping: %s (loader-specific)%n" + ANSI_RESET,
+                            loaderTag, "[SERVER CRASH RISK]", jar.getName());
                 } else if (isClientOnly) {
                     System.out.printf(ANSI_YELLOW + "%-20s %-20s Skipping: %s%n" + ANSI_RESET,
                             loaderTag, "[CLIENT ONLY]", jar.getName());
@@ -407,5 +411,19 @@ public class ClientModExtractor {
             return null;
         }
         return id.toLowerCase().replace("_", "-");
+    }
+
+    /**
+     * Checks exclusions that are unsafe to apply across every supported loader.
+     *
+     * @param loaderType Detected archive loader
+     * @param modId Extracted mod ID
+     * @return True when the mod is excluded only for its detected loader
+     */
+    private static boolean isLoaderSpecificExclude(String loaderType, String modId) {
+        return loaderType != null
+                && loaderType.contains("NeoForge")
+                && modId != null
+                && NEOFORGE_EXCLUDES.contains(normalizeModId(modId));
     }
 }
