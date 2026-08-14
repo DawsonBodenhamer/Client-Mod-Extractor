@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.7] - 2026-08-14
+
+### Added
+- **Java Installation Guidance**
+  - Added color-coded, beginner-friendly Java installation steps for Windows, Linux, and macOS when Java is missing, outdated, or cannot be identified.
+
+### Fixed
+- **Java Launcher Compatibility**
+  - Added an explicit Java 11 minimum-version check, preventing Java 8 from reporting the misleading `ClientModExtractor.java` main-class error.
+  - Made the Windows launcher run from its own directory so it can reliably locate `ClientModExtractor.java`.
+  - Preserved the extractor's exit status so launcher failures are reported correctly.
+
+---
+
 ## [1.0.6] - 2026-07-30
 
 ### Added

@@ -7,7 +7,7 @@ This tool scans through a folder full of `.jar` files, identifies which ones are
 If you are a Minecraft server owner, you probably know the pain of downloading or creating a big modpack to put on your server, only to realize that half of the mods in the folder are "Client-Side Only" (mods that only change things on your screen, like menus or sounds). If you drop those client-side mods onto your server, your server will either **instantly crash**, or **crash later** when the client-only code tries to run on the server.
 
 ## Features
-- **Cross-Platform:** Works on Windows, Mac, and Linux out-of-the-box (requires Java to be installed, which you already have if you play Minecraft).
+- **Cross-Platform:** Works on Windows, macOS, and Linux with a Java 11 or newer JDK installed. (You probably already have Java if you play Minecraft).
 - **Smart Cloud Library:** Automatically connects to GitHub to check massive lists of known "problematic" mods that have mislabeled themselves, falsely claiming to be server-safe.
 - **Offline Mode:** If you don't have internet access, falls back to a local list of exclusions.
 
@@ -37,6 +37,40 @@ If you are a Minecraft server owner, you probably know the pain of downloading o
 3. Open the newly created `Save_For_Server_Mods` folder.
 4. The `.jar` files inside `Save_For_Server_Mods` are... wait for it... safe for servers. Move these files to your server's `mods` folder.
 5. You can leave `ClientModExtractor.java` and the `.bat`/`.sh` files in your `mods` folder— Minecraft won't touch them— but you should probably delete the `Save_For_Server_Mods` folder once you're done, since it's full of `.jar` files.
+
+---
+
+### If Java Is Missing or Outdated
+
+Client Mod Extractor requires a **Java 11 or newer JDK**. The launcher checks this automatically and provides installation instructions when Java is missing or too old.
+
+#### Windows
+
+1. Open the [Eclipse Temurin downloads page](https://adoptium.net/temurin/releases/).
+2. Find the Windows download for the latest LTS version.
+3. Choose **JDK**, **MSI**, and **x64**.
+4. Open the downloaded installer.
+5. Keep **Add to PATH** enabled.
+6. Click **Next**, **Install**, and **Finish**.
+7. Run `Run-Extractor-Windows.bat` again.
+
+#### Linux
+
+Open a terminal and use the command for your Linux distribution:
+
+- Ubuntu or Debian: `sudo apt install default-jdk`
+- Fedora: `sudo dnf install java-latest-openjdk-devel`
+- Arch Linux: `sudo pacman -S jdk-openjdk`
+
+Approve the installation if asked, then run `Run-Extractor-Linux.sh` again.
+
+#### macOS
+
+1. Open the [Eclipse Temurin downloads page](https://adoptium.net/temurin/releases/).
+2. Select **macOS** and the latest LTS JDK.
+3. Download and open the **PKG** installer shown for your Mac.
+4. Complete the installation.
+5. Run `Run-Extractor-Linux.sh` again.
 
 ---
 

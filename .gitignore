@@ -3,6 +3,7 @@ script_errors.log
 *.class
 __pycache__/
 *.py[cod]
+tests/
 /Client Mod Extractor.iml
 /.idea/misc.xml
 /.idea/modules.xml
