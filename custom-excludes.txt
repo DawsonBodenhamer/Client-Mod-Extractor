@@ -59,6 +59,7 @@ neoculus
 nolijium
 norealmsbutton
 paperdoll
+perception
 particle-effects
 particle-rain
 reeses-sodium-options
