@@ -1,19 +1,17 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Client Mod Extractor - Publish Release" type="PythonConfigurationType" factoryName="Python">
+  <configuration default="false" name="Client Mod Extractor - Publish Release" type="ShConfigurationType" folderName="Client Mod Extractor">
+    <option name="SCRIPT_TEXT" value="cmd.exe /d /c tools\publish_release.cmd --publish" />
+    <option name="INDEPENDENT_SCRIPT_PATH" value="false" />
+    <option name="SCRIPT_PATH" value="" />
+    <option name="SCRIPT_OPTIONS" value="" />
+    <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+    <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="INDEPENDENT_INTERPRETER_PATH" value="false" />
+    <option name="INTERPRETER_PATH" value="" />
     <option name="INTERPRETER_OPTIONS" value="" />
-    <option name="PARENT_ENVS" value="true" />
+    <option name="EXECUTE_IN_TERMINAL" value="true" />
+    <option name="EXECUTE_SCRIPT_FILE" value="false" />
     <envs />
-    <option name="SDK_HOME" value="$USER_HOME$/AppData/Local/Programs/Python/Python313/python.exe" />
-    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-    <option name="IS_MODULE_SDK" value="false" />
-    <option name="ADD_CONTENT_ROOTS" value="true" />
-    <option name="ADD_SOURCE_ROOTS" value="true" />
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tools/publish_release.py" />
-    <option name="PARAMETERS" value="" />
-    <option name="SHOW_COMMAND_LINE" value="false" />
-    <option name="EMULATE_TERMINAL" value="true" />
-    <option name="MODULE_MODE" value="false" />
-    <option name="REDIRECT_INPUT" value="false" />
     <method v="2" />
   </configuration>
 </component>
