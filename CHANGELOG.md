@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.10] - Unreleased
 
+### Fixed
+- **Server-Safe Mod Detection**
+  - Fixed cases where examples left inside Forge and NeoForge mod files could make the extractor remove mods that are safe for servers.
+  - The extractor no longer mistakes a compatibility setting (`IGNORE_ALL_VERSION`) for proof that a mod is client-only.
+  - Iceberg is now kept for servers. Particular and Pretty Rain are also kept when using Forge 1.20.1, while their client-only NeoForge versions are still removed.
+
 ---
 
 ## [1.0.9] - 2026-08-26

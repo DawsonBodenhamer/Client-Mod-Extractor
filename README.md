@@ -86,16 +86,15 @@ The script reads the `.jar` files as standard ZIP archives and analyzes their me
 3. Identifies the mod as Client-Only if it contains `"environment": "client"`.
 
 ### NeoForge & Forge
-1. Locates `META-INF/neoforge.mods.toml` (for NeoForge) or `META-INF/mods.toml` (for Forge).
-2. **Dependency Striping:** To prevent false positives, the script intelligently slices the TOML file and ignores everything after the first `[[dependencies` or `[[mixins` block. This ensures that if a mod *depends* on a client-side mod (like `flywheel`), it isn't incorrectly flagged as client-only itself.
-3. Checks the core mod properties for any of the following tags:
+1. Reads the mod information stored inside each `.jar` file.
+2. Ignores comments and dependency settings so they do not cause false matches.
+3. Removes a mod only when its own settings clearly mark it as client-only:
    - `clientSideOnly = true`
    - `side = "CLIENT"`
-   - `displayTest = "IGNORE_ALL_VERSION"`
 
-`displayTest = "IGNORE_SERVER_VERSION"` is not treated as client-only because Forge uses it for server-only compatibility and does not define physical loading behavior with that property.
+Compatibility settings such as `IGNORE_ALL_VERSION` and `IGNORE_SERVER_VERSION` are not treated as client-only.
 
 ### Dynamic Cloud Exclusions
 The script reaches out via standard HTTP GET requests to fetch community-maintained blocklists (such as the `itzg` docker-minecraft-server JSON lists) and my own `custom-excludes.txt` list. It extracts the JSON arrays using regex and builds a unified Hash Set of blocked mod IDs. Any mod that matches these IDs is skipped, even if its internal metadata claims it is server-safe. This list handles client-only projects whose packaged metadata incorrectly declares them as compatible with both sides.
 
-Rare cases that are client-only on one loader but required on a server for another loader are handled by loader-specific exclusions. For example, Advancement Plaques is excluded on NeoForge without globally excluding its Forge distribution.
+Some mods need different treatment depending on the modloader. For example, Advancement Plaques is removed on NeoForge but kept on Forge. Particular and Pretty Rain are also kept on Forge 1.20.1, where the server needs them.

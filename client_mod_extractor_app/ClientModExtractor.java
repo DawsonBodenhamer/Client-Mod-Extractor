@@ -66,13 +66,9 @@ public class ClientModExtractor {
     private static final Pattern TOML_MOD_ID_PATTERN = Pattern.compile(
             "modId\\s*=\\s*[\"']([^\"']+)[\"']"
     );
-    private static final Pattern TOML_NON_CORE_BLOCK_PATTERN = Pattern.compile(
-            "\\[\\[(dependencies|mixins)", Pattern.CASE_INSENSITIVE
-    );
     private static final Pattern TOML_CLIENT_ONLY_PATTERN = Pattern.compile(
-            "clientSideOnly\\s*=\\s*true"
-                    + "|side\\s*=\\s*[\"']CLIENT[\"']"
-                    + "|displayTest\\s*=\\s*[\"']IGNORE_ALL_VERSION[\"']",
+            "\\s*clientSideOnly\\s*=\\s*true\\s*"
+                    + "|\\s*side\\s*=\\s*[\"']CLIENT[\"']\\s*",
             Pattern.CASE_INSENSITIVE
     );
     private static final Pattern LATEST_VERSION_PATTERN = Pattern.compile(
@@ -317,8 +313,9 @@ public class ClientModExtractor {
     }
 
     /**
-     * Parses project rules. Bare IDs are global exclusions, +ID entries are force
-     * includes, and loader:ID entries are loader-scoped exclusions.
+     * Parses project rules. Bare IDs are global exclusions, +ID entries are global
+     * force-includes, loader:ID entries are loader-scoped exclusions, and
+     * +loader:ID entries are loader-scoped force-includes.
      */
     private static void parseProjectRules(String content, ClassificationRules rules) {
         if (content == null) {
@@ -360,12 +357,14 @@ public class ClientModExtractor {
                 String tomlLoader = neoForge ? "NeoForge" : "Forge";
                 loaderType = "Fabric".equals(loaderType) ? loaderType + "/" + tomlLoader : tomlLoader;
 
-                String toml = readZipEntry(zip, tomlEntry);
+                String toml = stripTomlComments(readZipEntry(zip, tomlEntry));
                 if (modId == null) {
                     modId = extractTomlModId(toml);
                 }
-                String coreToml = TOML_NON_CORE_BLOCK_PATTERN.split(toml, 2)[0];
-                clientOnly = clientOnly || TOML_CLIENT_ONLY_PATTERN.matcher(coreToml).find();
+                Matcher modsBlockMatcher = TOML_MODS_BLOCK_PATTERN.matcher(toml);
+                while (modsBlockMatcher.find() && !clientOnly) {
+                    clientOnly = hasActiveTomlClientOnly(modsBlockMatcher.group(1));
+                }
             }
         }
         return new ArchiveMetadata(loaderType, normalizeModId(modId), clientOnly);
@@ -378,13 +377,15 @@ public class ClientModExtractor {
         if (metadata.clientOnly) {
             return Disposition.CLIENT_ONLY;
         }
-        if (rules.isGloballyExcluded(metadata.modId) && !rules.isForceIncluded(metadata.modId)) {
+        boolean forceIncluded = rules.isForceIncluded(metadata.modId)
+                || rules.isLoaderForceIncluded(metadata.loaderType, metadata.modId);
+        if (rules.isGloballyExcluded(metadata.modId) && !forceIncluded) {
             return Disposition.COMMUNITY_EXCLUDED;
         }
         if (rules.isLoaderExcluded(metadata.loaderType, metadata.modId)) {
             return Disposition.LOADER_EXCLUDED;
         }
-        return rules.isForceIncluded(metadata.modId)
+        return forceIncluded
                 ? Disposition.FORCE_INCLUDED
                 : Disposition.SERVER_COMPATIBLE;
     }
@@ -489,6 +490,117 @@ public class ClientModExtractor {
     }
 
     /**
+     * Removes TOML comments while preserving hash characters inside quoted values,
+     * including multiline basic and literal strings.
+     */
+    private static String stripTomlComments(String toml) {
+        StringBuilder active = new StringBuilder(toml.length());
+        char quote = 0;
+        boolean multiline = false;
+        boolean escaped = false;
+        for (int i = 0; i < toml.length(); i++) {
+            char current = toml.charAt(i);
+            if (quote != 0) {
+                active.append(current);
+                if (multiline && current == quote && !escaped
+                        && i + 2 < toml.length()
+                        && toml.charAt(i + 1) == quote
+                        && toml.charAt(i + 2) == quote) {
+                    active.append(quote).append(quote);
+                    i += 2;
+                    quote = 0;
+                    multiline = false;
+                    escaped = false;
+                } else if (!multiline && current == '\n') {
+                    quote = 0;
+                    escaped = false;
+                } else if (quote == '"' && current == '\\' && !escaped) {
+                    escaped = true;
+                } else {
+                    if (current == quote && !escaped) {
+                        quote = 0;
+                    }
+                    escaped = false;
+                }
+                continue;
+            }
+            if (current == '"' || current == '\'') {
+                quote = current;
+                active.append(current);
+                if (i + 2 < toml.length()
+                        && toml.charAt(i + 1) == quote
+                        && toml.charAt(i + 2) == quote) {
+                    active.append(quote).append(quote);
+                    i += 2;
+                    multiline = true;
+                }
+            } else if (current == '#') {
+                while (i + 1 < toml.length() && toml.charAt(i + 1) != '\n') {
+                    i++;
+                }
+            } else {
+                active.append(current);
+            }
+        }
+        return active.toString();
+    }
+
+    /**
+     * Checks assignment lines in one [[mods]] block while ignoring multiline
+     * string bodies that may contain text resembling TOML keys.
+     */
+    private static boolean hasActiveTomlClientOnly(String modsBlock) {
+        char multilineQuote = 0;
+        for (String line : modsBlock.split("\\R", -1)) {
+            if (multilineQuote == 0 && TOML_CLIENT_ONLY_PATTERN.matcher(line).matches()) {
+                return true;
+            }
+            multilineQuote = multilineQuoteAfter(line, multilineQuote);
+        }
+        return false;
+    }
+
+    /** Returns the multiline quote state after parsing one comment-free TOML line. */
+    private static char multilineQuoteAfter(String line, char multilineQuote) {
+        boolean escaped = false;
+        for (int i = 0; i < line.length(); i++) {
+            char current = line.charAt(i);
+            if (multilineQuote != 0) {
+                if (current == multilineQuote && !escaped
+                        && i + 2 < line.length()
+                        && line.charAt(i + 1) == multilineQuote
+                        && line.charAt(i + 2) == multilineQuote) {
+                    multilineQuote = 0;
+                    i += 2;
+                } else if (multilineQuote == '"' && current == '\\' && !escaped) {
+                    escaped = true;
+                } else {
+                    escaped = false;
+                }
+                continue;
+            }
+            if (current != '"' && current != '\'') {
+                continue;
+            }
+            char quote = current;
+            if (i + 2 < line.length() && line.charAt(i + 1) == quote && line.charAt(i + 2) == quote) {
+                multilineQuote = quote;
+                i += 2;
+                continue;
+            }
+            for (i++; i < line.length(); i++) {
+                current = line.charAt(i);
+                if (quote == '"' && current == '\\') {
+                    i++;
+                } else if (current == quote) {
+                    break;
+                }
+            }
+        }
+        return multilineQuote;
+    }
+
+    /**
      * Returns the JSON object nesting depth at a character offset.
      *
      * @param json Raw JSON object
@@ -568,20 +680,18 @@ public class ClientModExtractor {
         private final Set<String> globalExcludes = new HashSet<>();
         private final Set<String> forceIncludes = new HashSet<>();
         private final Map<String, Set<String>> loaderExcludes = new HashMap<>();
+        private final Map<String, Set<String>> loaderForceIncludes = new HashMap<>();
 
         private void addProjectRule(String rule) {
             if (rule.startsWith("+")) {
-                addNormalized(forceIncludes, rule.substring(1));
+                String forceRule = rule.substring(1).trim();
+                if (!addLoaderRule(loaderForceIncludes, forceRule)) {
+                    addNormalized(forceIncludes, forceRule);
+                }
                 return;
             }
 
-            int separator = rule.indexOf(':');
-            if (separator > 0 && separator < rule.length() - 1) {
-                String loader = rule.substring(0, separator).trim().toLowerCase(Locale.ROOT);
-                String modId = normalizeModId(rule.substring(separator + 1));
-                if (!loader.isEmpty() && modId != null && !modId.isEmpty()) {
-                    loaderExcludes.computeIfAbsent(loader, ignored -> new HashSet<>()).add(modId);
-                }
+            if (addLoaderRule(loaderExcludes, rule)) {
                 return;
             }
             addNormalized(globalExcludes, rule);
@@ -595,14 +705,12 @@ public class ClientModExtractor {
             return modId != null && forceIncludes.contains(modId);
         }
 
+        private boolean isLoaderForceIncluded(String loaderType, String modId) {
+            return loaderRuleMatches(loaderForceIncludes, loaderType, modId);
+        }
+
         private boolean isLoaderExcluded(String loaderType, String modId) {
-            if (loaderType == null || modId == null) {
-                return false;
-            }
-            String normalizedLoader = loaderType.toLowerCase(Locale.ROOT);
-            return loaderExcludes.entrySet().stream()
-                    .anyMatch(entry -> normalizedLoader.contains(entry.getKey())
-                            && entry.getValue().contains(modId));
+            return loaderRuleMatches(loaderExcludes, loaderType, modId);
         }
 
         private int exclusionCount() {
@@ -615,6 +723,36 @@ public class ClientModExtractor {
             if (normalized != null && !normalized.isEmpty()) {
                 target.add(normalized);
             }
+        }
+
+        private static boolean addLoaderRule(Map<String, Set<String>> target, String rule) {
+            int separator = rule.indexOf(':');
+            if (separator <= 0 || separator >= rule.length() - 1) {
+                return false;
+            }
+            String loader = rule.substring(0, separator).trim().toLowerCase(Locale.ROOT);
+            String modId = normalizeModId(rule.substring(separator + 1));
+            if (loader.isEmpty() || modId == null || modId.isEmpty()) {
+                return false;
+            }
+            target.computeIfAbsent(loader, ignored -> new HashSet<>()).add(modId);
+            return true;
+        }
+
+        private static boolean loaderRuleMatches(
+                Map<String, Set<String>> rules,
+                String loaderType,
+                String modId
+        ) {
+            if (loaderType == null || modId == null) {
+                return false;
+            }
+            Set<String> normalizedLoaders = Arrays.stream(loaderType.toLowerCase(Locale.ROOT).split("/"))
+                    .map(String::trim)
+                    .collect(Collectors.toSet());
+            return rules.entrySet().stream()
+                    .anyMatch(entry -> normalizedLoaders.contains(entry.getKey())
+                            && entry.getValue().contains(modId));
         }
     }
 
