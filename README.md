@@ -1,7 +1,7 @@
 # Client Mod Extractor
 
 ## TL;DR
-This tool scans through a folder full of `.jar` files, identifies which ones are safe for the server, and safely copies them into a `Save_For_Server_Mods` folder so you can drag-and-drop them right onto your server.
+This tool scans through a folder full of `.jar` files, identifies which ones are safe for the server, and safely copies them into a folder called `Save_For_Server_Mods` _(overwrites the content if you already have that folder)_ so you can drag-and-drop them right onto your server.
 
 ## The Problem I'm Fixing
 If you are a Minecraft server owner, you probably know the pain of downloading or creating a big modpack to put on your server, only to realize that half of the mods in the folder are "Client-Side Only" (mods that only change things on your screen, like menus or sounds). If you drop those client-side mods onto your server, your server will either **instantly crash**, or **crash later** when the client-only code tries to run on the server.
@@ -34,7 +34,7 @@ If you are a Minecraft server owner, you probably know the pain of downloading o
    - **Linux / Mac:** `Run-Extractor-Linux.sh`
    - *Note for Windows users: If Windows displays a "Security Warning" or "Windows protected your PC" prompt, uncheck "Always ask before opening this file" and click **Run**, or click **More info** followed by **Run anyway**.*
 2. Wait for the terminal window to process the files.
-3. Open the newly created `Save_For_Server_Mods` folder.
+3. Open the `Save_For_Server_Mods` folder.
 4. The `.jar` files inside `Save_For_Server_Mods` are... wait for it... safe for servers. Move these files to your server's `mods` folder.
 5. You can leave `ClientModExtractor.java` and the `.bat`/`.sh` files in your `mods` folder— Minecraft won't touch them— but you should probably delete the `Save_For_Server_Mods` folder once you're done, since it's full of `.jar` files.
 

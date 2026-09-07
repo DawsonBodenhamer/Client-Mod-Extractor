@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.11] - Unreleased
 
+### Fixed
+- **Clean Output Rebuild**
+  - Rebuilt the `Save_For_Server_Mods` folder on every run so client-only mods removed from a pack, newly blacklisted files or stale server files from previous extractions do not survive into the current server folder.
+
 ---
 
 ## [1.0.10] - 2026-08-28

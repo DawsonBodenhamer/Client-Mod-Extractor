@@ -22,6 +22,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
+import java.nio.file.LinkOption;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
 /**
@@ -35,6 +39,7 @@ public class ClientModExtractor {
      * ────────────────────────────────────────────────────────────────────────────*/
 
     private static final String CURRENT_VERSION = "1.0.11";
+    private static final String OUTPUT_DIRECTORY_NAME = "Save_For_Server_Mods";
 
     private static final String CF_EXCLUDES_URL = configuredUrl(
             "cme.cf-excludes-url",
@@ -129,19 +134,14 @@ public class ClientModExtractor {
             System.out.println();
         }
 
-        // --- 3. Build Target Directory ---
-        Path sourceFolder = Paths.get("").toAbsolutePath();
-        Path targetFolder = sourceFolder.resolve("Save_For_Server_Mods");
+        Path sourceFolder = Paths.get("").toAbsolutePath().normalize();
+        Path targetFolder = sourceFolder.resolve(configuredOutputDirectory()).normalize();
 
         try {
-            if (!Files.exists(targetFolder)) {
-                Files.createDirectories(targetFolder);
-            }
-
-            // --- 4. Load Classification Rules ---
+            // --- 3. Load Classification Rules ---
             ClassificationRules rules = loadClassificationRules(sourceFolder);
 
-            // --- 5. Process Local Archives ---
+            // --- 4. Process Local Archives ---
             File[] jarFiles = sourceFolder.toFile().listFiles(
                     (directory, name) -> name.toLowerCase(Locale.ROOT).endsWith(".jar")
             );
@@ -155,6 +155,10 @@ public class ClientModExtractor {
             System.out.println(ANSI_CYAN + "Location: " + sourceFolder);
             System.out.println("Scanning " + jarFiles.length + " files...\n" + ANSI_RESET);
 
+            // --- 5. Reset Output Directory ---
+            resetOutputDirectory(sourceFolder, targetFolder);
+
+            // --- 6. Process and Copy Mods ---
             for (File jar : jarFiles) {
                 ArchiveMetadata metadata;
                 try {
@@ -178,14 +182,14 @@ public class ClientModExtractor {
             System.out.println();
             System.out.println(ANSI_CYAN + "==========================================================");
             System.out.println("Done! Processed " + processedCount + " mods.");
-            System.out.println("Copied " + copiedCount + " server-safe mods to: ./Save_For_Server_Mods" + ANSI_RESET);
+            System.out.println("Rebuilt ./Save_For_Server_Mods containing exclusively " + copiedCount + " server-safe mods." + ANSI_RESET);
             System.out.println();
             System.out.println(ANSI_YELLOW + "==========================================================");
             System.out.println("Database Check:" + ANSI_RESET);
             System.out.println("Successfully checked online database and found " + ANSI_GREEN + rules.exclusionCount() + ANSI_RESET + " community-blacklisted mods.");
             System.out.println("This list was used to manually block client-only mods that were " + ANSI_RED + "mislabeled by their developers" + ANSI_RESET + ".");
 
-            // --- 6. Support and Issue Reporting. ---
+            // --- 7. Support and Issue Reporting. ---
             if (promptAffirmation) {
                 System.out.println();
                 System.out.println(ANSI_YELLOW + "==========================================================");
@@ -202,7 +206,7 @@ public class ClientModExtractor {
                         ANSI_RED + "JAR filename" + ANSI_RESET + " that caused the crash.");
             }
 
-            // --- 7. Affirmation Message. ---
+            // --- 8. Affirmation Message. ---
             if (promptAffirmation) {
                 System.out.println();
                 System.out.println("==========================================================");
@@ -223,10 +227,55 @@ public class ClientModExtractor {
      * ────────────────────────────────────────────────────────────────────────────*/
 
     /**
-     * Checks the GitHub repository releases API to retrieve the latest version tag.
+     * Resets the target output directory so it contains exclusively the current run's mods.
+     * Validates that the target path is strictly the direct child 'Save_For_Server_Mods' of
+     * the source directory, deletes all entries deepest-first without following symbolic links,
+     * and recreates the empty output directory.
      *
-     * @return Latest tag string, or null if query fails
+     * @param sourceFolder Source mods directory
+     * @param targetFolder Target output directory
+     * @throws IOException If path validation fails or if deleting/creating files fails
      */
+    private static void resetOutputDirectory(Path sourceFolder, Path targetFolder) throws IOException {
+        Path normalizedSource = sourceFolder.toAbsolutePath().normalize();
+        Path normalizedTarget = targetFolder.toAbsolutePath().normalize();
+
+        Path parent = normalizedTarget.getParent();
+        Path fileName = normalizedTarget.getFileName();
+
+        if (parent == null || !parent.equals(normalizedSource)
+                || fileName == null || !OUTPUT_DIRECTORY_NAME.equals(fileName.toString())) {
+            throw new IOException("Safety check failed: target output directory must be strictly the direct '"
+                    + OUTPUT_DIRECTORY_NAME + "' child of " + normalizedSource + ", got: " + normalizedTarget);
+        }
+
+        if (Files.exists(normalizedTarget, LinkOption.NOFOLLOW_LINKS)) {
+            if (Files.isSymbolicLink(normalizedTarget)) {
+                Files.delete(normalizedTarget);
+            } else {
+                try (Stream<Path> stream = Files.walk(normalizedTarget)) {
+                    List<Path> paths = stream.sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+                    for (Path path : paths) {
+                        Files.delete(path);
+                    }
+                }
+            }
+        }
+
+        Files.createDirectories(normalizedTarget);
+    }
+
+    /**
+     * Allows tests to configure the output directory name to verify path safety guards.
+     */
+    private static String configuredOutputDirectory() {
+        try {
+            return System.getProperty("cme.output-dir", OUTPUT_DIRECTORY_NAME);
+        } catch (SecurityException e) {
+            return OUTPUT_DIRECTORY_NAME;
+        }
+    }
+
     private static String getLatestVersion() {
         try {
             String json = fetchUrl(LATEST_VERSION_URL);
