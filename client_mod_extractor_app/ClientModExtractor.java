@@ -38,7 +38,7 @@ public class ClientModExtractor {
      *        Constants and Configuration
      * ────────────────────────────────────────────────────────────────────────────*/
 
-    private static final String CURRENT_VERSION = "1.0.11";
+    private static final String CURRENT_VERSION = "1.0.12";
     private static final String OUTPUT_DIRECTORY_NAME = "Save_For_Server_Mods";
 
     private static final String CF_EXCLUDES_URL = configuredUrl(
