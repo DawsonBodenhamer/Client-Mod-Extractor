@@ -1,5 +1,6 @@
 986380
 armor_3d
+autohud
 barista
 better-modlist-neoforge
 betterbiomeblend
@@ -17,6 +18,7 @@ content-creator-integration
 coolrain
 craftpresence
 crash_assistant
+createjeicompat
 cubes-without-borders
 cull-less-leaves
 cursor-mod
@@ -30,6 +32,7 @@ entity-culling
 entityculling
 equipment-compare
 equipmentcompare
+farsight_view
 fastquit
 fastquit-forge
 flyspeed
@@ -47,6 +50,7 @@ just-enough-resources-profiler-jeargh
 just-zoom
 lightweight-inventory-sorting
 lighty
+mafglib
 mekalus-oculus-fork-with-fixed-mekanism-mekasuit
 minemenu
 mob-player-animator
@@ -62,6 +66,7 @@ paperdoll
 perception
 particle-effects
 particle-rain
+polytone
 reeses-sodium-options
 resource-loader
 satisfying_buttons
@@ -75,6 +80,7 @@ sound
 ssrcamerafixes
 status-effect-bars-reforged
 stellarview
+tweakerge
 void-fog
 voxy
 waila-stages
@@ -90,3 +96,4 @@ yungs-menu-tweaks-neoforge
 +forge:particular
 +forge:particlerain
 neoforge:advancementplaques
+neoforge:enhancedblockentities

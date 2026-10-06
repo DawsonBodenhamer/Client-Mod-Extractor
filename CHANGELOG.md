@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.12] - Unreleased
 
+### Fixed
+- **Curated Client-Mod Exclusions**
+  - Corrected server-pack extraction for Farsight, Polytone, Create JEI Compat, Enhanced Block Entities NEOFORGED, Auto HUD, Tweakerge, and MaFgLib since their packaged metadata does not identify them as client-only.
+  - Kept Iron Furnace Reburn eligible for server packs. Make sure you update to `0.4.7`, since it fixes a server startup crash that was present in `0.4.6`.
+
 ---
 
 ## [1.0.11] - 2026-09-07
